@@ -7,11 +7,13 @@ import (
 )
 
 func main() {
+	fetcher := rss.NewFetcher()
 	url := "https://ed-thomas.dev/rss.xml"
-	feed, err := rss.GetFeed(url)
+
+	feed, err := fetcher.GetFeed(url)
 	if err != nil {
 		fmt.Printf("err %v", err)
-		return 
+		return
 	}
 	fmt.Println(feed.Title)
 }

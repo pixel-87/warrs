@@ -1,25 +1,89 @@
 package rss
 
-import "github.com/mmcdole/gofeed"
+import (
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/mmcdole/gofeed"
+)
 
 // A single post in a feed
-type post struct {
-	title string
-	content string
-	link string
-	id int
-	read bool
+type Post struct {
+	Title   string
+	Content string
+	Link    string
+	ID      int
+	Read    bool
 }
 
-// An entire feed
-type feed struct {
-	title string
-	URL string
-	posts []post
-	id int
+// An entire Feed
+type Feed struct {
+	Title string
+	URL   string
+	Posts []Post
+	ID    int
 }
 
-func GetFeed(url string) (*gofeed.Feed, error) {
-	fp := gofeed.NewParser()
-	return fp.ParseURL(url)
+type Fetcher struct {
+	parser *gofeed.Parser
+	client *http.Client
+}
+
+func NewFetcher() *Fetcher {
+	return &Fetcher{
+		parser: gofeed.NewParser(),
+		client: &http.Client{
+			Timeout: 10 * time.Second,
+		},
+	}
+}
+
+func (f *Fetcher) fetchURL(url string) ([]byte, error) {
+	resp, err := f.client.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch URL %s: %w", url, err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read responce body: %w", err)
+	}
+	return body, nil
+}
+
+func (f *Fetcher) parseFeed(url string, data []byte) (Feed, error) {
+	rawFeed, err := f.parser.Parse(strings.NewReader(string(data)))
+	if err != nil {
+		return Feed{}, fmt.Errorf("Failed parsing %s: %w", url, err)
+	}
+
+	myFeed := Feed{
+		Title: rawFeed.Title,
+		URL:   url,
+	}
+	for _, item := range rawFeed.Items {
+		content := item.Content
+		if content == "" {
+			content = item.Description
+		}
+		myFeed.Posts = append(myFeed.Posts, Post{
+			Title:   item.Title,
+			Link:    item.Link,
+			Content: content,
+		})
+	}
+	return myFeed, nil
+}
+
+func (f *Fetcher) GetFeed(url string) (Feed, error) {
+	body, err := f.fetchURL(url)
+	if err != nil {
+		return Feed{}, err
+	}
+
+	return f.parseFeed(url, body)
 }

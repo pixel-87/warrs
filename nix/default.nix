@@ -9,9 +9,9 @@ buildGoModule {
     fileset = lib.fileset.intersection (lib.fileset.fromSource (lib.sources.cleanSource ../.)) (
       lib.fileset.unions [
       ../go.mod
-      #../go.sum
+      ../go.sum
       ../main.go
-      #../internal
+      ../internal
       ]
     );
   };
