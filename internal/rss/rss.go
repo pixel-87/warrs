@@ -46,7 +46,9 @@ func (f *Fetcher) fetchURL(url string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch URL %s: %w", url, err)
 	}
-	defer resp.Body.Close()
+	defer func () {
+		resp.Body.Close()
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -58,7 +60,7 @@ func (f *Fetcher) fetchURL(url string) ([]byte, error) {
 func (f *Fetcher) parseFeed(url string, data []byte) (Feed, error) {
 	rawFeed, err := f.parser.Parse(strings.NewReader(string(data)))
 	if err != nil {
-		return Feed{}, fmt.Errorf("Failed parsing %s: %w", url, err)
+		return Feed{}, fmt.Errorf("failed parsing %s: %w", url, err)
 	}
 
 	myFeed := Feed{
