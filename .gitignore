@@ -1,0 +1,25 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Output of the go coverage tool
+coverage.out
+
+# Built application binaries
+/bin/
+
+# Vendor directory
+/vendor/
+
+# IDEs and editors
+.idea/
+.vscode/
+.DS_Store
+
+# Nix
+/result
+result/
+vendor/
+.direnv/
