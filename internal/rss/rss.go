@@ -47,7 +47,9 @@ func (f *Fetcher) fetchURL(url string) ([]byte, error) {
 		return nil, fmt.Errorf("failed to fetch URL %s: %w", url, err)
 	}
 	defer func () {
-		resp.Body.Close()
+		if cerr := resp.Body.Close(); cerr != nil {
+			fmt.Printf("error closing response body %v", cerr)
+		}
 	}()
 
 	body, err := io.ReadAll(resp.Body)
