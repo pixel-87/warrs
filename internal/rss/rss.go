@@ -27,6 +27,7 @@ type Feed struct {
 	ID    int
 }
 
+// Allows for reuse of gofeed.Parser and http.client
 type Fetcher struct {
 	parser *gofeed.Parser
 	client *http.Client
@@ -60,6 +61,7 @@ func (f *Fetcher) fetchURL(url string) ([]byte, error) {
 }
 
 func (f *Fetcher) parseFeed(url string, data []byte) (Feed, error) {
+	// Parses any feed into a universal gofeed.Feed, takes an io reader which reads xml/json data
 	rawFeed, err := f.parser.Parse(strings.NewReader(string(data)))
 	if err != nil {
 		return Feed{}, fmt.Errorf("failed parsing %s: %w", url, err)
