@@ -10,12 +10,14 @@ import (
 	"github.com/mmcdole/gofeed"
 
 	"github.com/pixel-87/warss/internal/models"
+	"github.com/pixel-87/warss/internal/storage"
 )
 
 // Allows for reuse of gofeed.Parser and http.client
 type Fetcher struct {
 	parser *gofeed.Parser
 	client *http.Client
+	db     *storage.DB
 }
 
 func NewFetcher() *Fetcher {
@@ -32,7 +34,7 @@ func (f *Fetcher) fetchURL(url string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch URL %s: %w", url, err)
 	}
-	defer func () {
+	defer func() {
 		if cerr := resp.Body.Close(); cerr != nil {
 			fmt.Printf("error closing response body %v", cerr)
 		}
@@ -40,7 +42,7 @@ func (f *Fetcher) fetchURL(url string) ([]byte, error) {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read responce body: %w", err)
+		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 	return body, nil
 }
