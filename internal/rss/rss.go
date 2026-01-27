@@ -8,24 +8,9 @@ import (
 	"time"
 
 	"github.com/mmcdole/gofeed"
+
+	"github.com/pixel-87/warss/internal/models"
 )
-
-// A single post in a feed
-type Post struct {
-	Title   string
-	Content string
-	Link    string
-	ID      int
-	Read    bool
-}
-
-// An entire Feed
-type Feed struct {
-	Title string
-	URL   string
-	Posts []Post
-	ID    int
-}
 
 // Allows for reuse of gofeed.Parser and http.client
 type Fetcher struct {
@@ -60,14 +45,14 @@ func (f *Fetcher) fetchURL(url string) ([]byte, error) {
 	return body, nil
 }
 
-func (f *Fetcher) parseFeed(url string, data []byte) (Feed, error) {
+func (f *Fetcher) parseFeed(url string, data []byte) (models.Feed, error) {
 	// Parses any feed into a universal gofeed.Feed, takes an io reader which reads xml/json data
 	rawFeed, err := f.parser.Parse(strings.NewReader(string(data)))
 	if err != nil {
-		return Feed{}, fmt.Errorf("failed parsing %s: %w", url, err)
+		return models.Feed{}, fmt.Errorf("failed parsing %s: %w", url, err)
 	}
 
-	myFeed := Feed{
+	myFeed := models.Feed{
 		Title: rawFeed.Title,
 		URL:   url,
 	}
@@ -76,7 +61,7 @@ func (f *Fetcher) parseFeed(url string, data []byte) (Feed, error) {
 		if content == "" {
 			content = item.Description
 		}
-		myFeed.Posts = append(myFeed.Posts, Post{
+		myFeed.Posts = append(myFeed.Posts, models.Post{
 			Title:   item.Title,
 			Link:    item.Link,
 			Content: content,
@@ -85,10 +70,10 @@ func (f *Fetcher) parseFeed(url string, data []byte) (Feed, error) {
 	return myFeed, nil
 }
 
-func (f *Fetcher) GetFeed(url string) (Feed, error) {
+func (f *Fetcher) GetFeed(url string) (models.Feed, error) {
 	body, err := f.fetchURL(url)
 	if err != nil {
-		return Feed{}, err
+		return models.Feed{}, err
 	}
 
 	return f.parseFeed(url, body)
