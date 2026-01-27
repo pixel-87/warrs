@@ -1,0 +1,61 @@
+package storage
+
+import (
+	"database/sql"
+	"fmt"
+
+	_ "github.com/mattn/go-sqlite3"
+)
+
+type DB struct {
+	conn *sql.DB
+}
+
+// init sqlite3 file and create tables if they don't exist
+func NewDB(path string) (*DB, error) {
+	db, err := sql.Open("sqlite3", path)
+
+	if err != nil {
+		return nil, fmt.Errorf("error opening database: %w", err)
+	}
+
+	if err := db.Ping(); err != nil {
+		return nil, fmt.Errorf("error pinging database: %w", err)
+	}
+
+	query := `
+	CREATE TABLE IF NOT EXISTS feeds (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		url TEXT UNIQUE NOT NULL,
+		title TEXT
+	);`
+
+	if _, err := db.Exec(query); err != nil {
+		return nil, fmt.Errorf("error creating feed table: %w", err)
+	}
+
+	return &DB{conn: db}, nil
+}
+
+func (d *DB) Close() error {
+	return d.conn.Close()
+}
+
+func (d *DB) GetSubscriptions() ([]string, error) {
+	rows, err := d.conn.Query("SELECT url FROM feeds")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var urls []string
+
+	for rows.Next() {
+		var url string
+		if err := rows.Scan(&url); err != nil {
+			return nil, err
+		}
+		urls = append(urls, url)
+	}
+	return urls, nil
+}
