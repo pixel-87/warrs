@@ -13,8 +13,8 @@
     in 
     {
       packages = forAllSystems (pkgs: {
-        edwarss = pkgs.callPackage ./nix/default.nix { version = self.shortRev or "unstable"; };
-        default = self.packages.${pkgs.stdenv.hostPlatform.system}.edwarss;
+        warss = pkgs.callPackage ./nix/default.nix { version = self.shortRev or "unstable"; };
+        default = self.packages.${pkgs.stdenv.hostPlatform.system}.warss;
         });
 
       devShells = forAllSystems (pkgs: {
@@ -22,7 +22,7 @@
         });
 
       overlays.default = final: _: {
-        edwarss = final.callPackage ./nix/default.nix { version = self.shortRev or "unstable"; };
+        warss = final.callPackage ./nix/default.nix { version = self.shortRev or "unstable"; };
       };
     };
 }

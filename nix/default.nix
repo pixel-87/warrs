@@ -1,7 +1,7 @@
 { lib, buildGoModule, version ? "unstable" }:
 
 buildGoModule {
-  pname = "edwarss";
+  pname = "warss";
   inherit version;
 
   src = lib.fileset.toSource {
@@ -26,9 +26,9 @@ buildGoModule {
 
   meta = {
     description = "A TUI RSS feed";
-    homepage = "https://github.com/pixel-87/edwarss";
+    homepage = "https://github.com/pixel-87/warss";
     license = lib.licenses.gpl3Plus;
     maintainers = with lib.maintainers; [ pixel-87 ];
-    mainProgram = "edwarss";
+    mainProgram = "warss";
   };
 }

@@ -1,4 +1,4 @@
-module github.com/pixel-87/edwarss
+module github.com/pixel-87/warss
 
 go 1.25.5
 

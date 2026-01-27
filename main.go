@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/pixel-87/edwarss/internal/rss"
+	"github.com/pixel-87/warss/internal/rss"
 )
 
 func main() {
