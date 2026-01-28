@@ -1,13 +1,18 @@
 package storage
 
 import (
+	"fmt"
+
 	"github.com/pixel-87/warss/internal/models"
 )
 
 func (d *DB) AddFeed(url, title string) error {
 	query := `INSERT INTO feeds (url, title) VALUES (?, ?)`
-	_, err := d.conn.Exec(query, url, title)
-	return err
+  _, err := d.conn.Exec(query, url, title)
+	if err != nil {
+		return fmt.Errorf("failed to add feed %q: %w", url, err)
+	}
+	return nil
 }
 
 func (d *DB) GetFeeds() ([]models.Feed, error) {
@@ -25,5 +30,31 @@ func (d *DB) GetFeeds() ([]models.Feed, error) {
 		}
 		feeds = append(feeds, f)
 	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating feeds: %w", err)
+	}
 	return feeds, nil
+}
+
+func (d *DB) UpdateFeed(f models.Feed) error {
+	query := `
+		UPDATE feeds
+		SET url = ?, title = ?
+		WHERE id = ?
+	`
+
+	_, err := d.conn.Exec(query, f.URL, f.Title, f.ID)
+	if err != nil {
+		return fmt.Errorf("failed to update feed %d: %w", f.ID, err)
+	}
+	return nil
+}
+
+func (d *DB) DeleteFeed(id int) error {
+	query := `DELETE FROM feeds WHERE id = ?`
+	_, err := d.conn.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("could not delete feed: %w", err)
+	}
+	return nil
 }

@@ -40,22 +40,3 @@ func NewDB(path string) (*DB, error) {
 func (d *DB) Close() error {
 	return d.conn.Close()
 }
-
-func (d *DB) GetSubscriptions() ([]string, error) {
-	rows, err := d.conn.Query("SELECT url FROM feeds")
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var urls []string
-
-	for rows.Next() {
-		var url string
-		if err := rows.Scan(&url); err != nil {
-			return nil, err
-		}
-		urls = append(urls, url)
-	}
-	return urls, nil
-}
