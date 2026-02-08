@@ -28,3 +28,4 @@ warrs
 result/
 vendor/
 .direnv/
+tmp/
