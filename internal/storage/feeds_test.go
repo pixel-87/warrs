@@ -3,6 +3,7 @@ package storage
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/pixel-87/warss/internal/models"
@@ -252,7 +253,7 @@ func TestAddFeedEdgeCases(t *testing.T) {
 	}{
 		{
 			name:    "Very long URL",
-			url:     "https://example.com/" + string(make([]byte, 2000)),
+			url:     "https://example.com/" + strings.Repeat("a", 2000),
 			title:   "Test",
 			wantErr: false,
 		},
