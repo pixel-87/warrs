@@ -6,6 +6,7 @@
   gopls,
   gofumpt,
   goreleaser,
+  golangci-lint,
 }:
 
 let
@@ -19,5 +20,6 @@ mkShell {
     gopls
     gofumpt
     goreleaser
+    golangci-lint
   ];
 }
