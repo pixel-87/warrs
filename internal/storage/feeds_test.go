@@ -336,49 +336,53 @@ func TestAddFeedEdgeCases(t *testing.T) {
 // TestUpdateFeedEdgeCases tests update with edge cases
 func TestUpdateFeedEdgeCases(t *testing.T) {
 	tests := []struct {
-		name        string
-		initialURL  string
-		initialTitle string
-		updateURL   string
-		updateTitle string
-		updateID    int
-		wantErr     bool
+		name          string
+		initialURL    string
+		initialTitle  string
+		updateURL     string
+		updateTitle   string
+		updateID      int
+		useActualID   bool // If true, fetch actual ID after insertion
+		wantErr       bool
 	}{
 		{
-			name:        "Update non-existent feed",
-			initialURL:  "https://example.com/exists.xml",
+			name:         "Update non-existent feed",
+			initialURL:   "https://example.com/exists.xml",
 			initialTitle: "Exists",
-			updateURL:   "https://example.com/new.xml",
-			updateTitle: "Updated",
-			updateID:    99999, // Non-existent ID
-			wantErr:     false, // SQLite silently succeeds if no rows affected
+			updateURL:    "https://example.com/new.xml",
+			updateTitle:  "Updated",
+			updateID:     99999, // Non-existent ID
+			useActualID:  false,
+			wantErr:      false, // SQLite silently succeeds if no rows affected
 		},
 		{
-			name:        "Update with negative ID",
-			initialURL:  "https://example.com/exists.xml",
+			name:         "Update with negative ID",
+			initialURL:   "https://example.com/exists.xml",
 			initialTitle: "Exists",
-			updateURL:   "https://example.com/new.xml",
-			updateTitle: "Updated",
-			updateID:    -1,
-			wantErr:     false,
+			updateURL:    "https://example.com/new.xml",
+			updateTitle:  "Updated",
+			updateID:     -1,
+			useActualID:  false,
+			wantErr:      false,
 		},
 		{
-			name:        "Update with zero ID",
-			initialURL:  "https://example.com/exists.xml",
+			name:         "Update with zero ID",
+			initialURL:   "https://example.com/exists.xml",
 			initialTitle: "Exists",
-			updateURL:   "https://example.com/new.xml",
-			updateTitle: "Updated",
-			updateID:    0,
-			wantErr:     false,
+			updateURL:    "https://example.com/new.xml",
+			updateTitle:  "Updated",
+			updateID:     0,
+			useActualID:  false,
+			wantErr:      false,
 		},
 		{
-			name:        "Update to empty strings",
-			initialURL:  "https://example.com/exists.xml",
+			name:         "Update to empty strings",
+			initialURL:   "https://example.com/exists.xml",
 			initialTitle: "Exists",
-			updateURL:   "",
-			updateTitle: "",
-			updateID:    1,
-			wantErr:     false,
+			updateURL:    "",
+			updateTitle:  "",
+			useActualID:  true,
+			wantErr:      false,
 		},
 	}
 
@@ -391,9 +395,22 @@ func TestUpdateFeedEdgeCases(t *testing.T) {
 				t.Fatalf("failed to add initial feed: %v", err)
 			}
 
+			// Determine which ID to use for update
+			updateID := tt.updateID
+			if tt.useActualID {
+				feeds, err := db.GetFeeds()
+				if err != nil {
+					t.Fatalf("failed to get feeds: %v", err)
+				}
+				if len(feeds) == 0 {
+					t.Fatal("expected at least one feed after insertion")
+				}
+				updateID = feeds[0].ID
+			}
+
 			// Update feed
 			feed := models.Feed{
-				ID:    tt.updateID,
+				ID:    updateID,
 				URL:   tt.updateURL,
 				Title: tt.updateTitle,
 			}
