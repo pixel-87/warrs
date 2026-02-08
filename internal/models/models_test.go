@@ -231,6 +231,67 @@ func TestPostIsValid(t *testing.T) {
 			},
 			want: true,
 		},
+		{
+			name: "Valid - very long title",
+			post: Post{
+				Title:   strings.Repeat("A", 10000),
+				Content: "Content",
+				Link:    "http://example.com",
+			},
+			want: true,
+		},
+		{
+			name: "Valid - Unicode in all fields",
+			post: Post{
+				Title:   "日本語のタイトル 🚀",
+				Content: "محتوى عربي",
+				Link:    "http://example.com/日本語",
+			},
+			want: true,
+		},
+		{
+			name: "Valid - HTML in content",
+			post: Post{
+				Title:   "HTML Post",
+				Content: "<script>alert('xss')</script><p>Paragraph</p>",
+				Link:    "http://example.com",
+			},
+			want: true,
+		},
+		{
+			name: "Valid - Special characters in link",
+			post: Post{
+				Title:   "Query Params",
+				Content: "Content",
+				Link:    "http://example.com/path?param=value&other=test#anchor",
+			},
+			want: true,
+		},
+		{
+			name: "Valid - Newlines in title and content",
+			post: Post{
+				Title:   "Multi-line Title\nLine 2",
+				Content: "Line 1\nLine 2\tTabbed\rCarriage Return",
+				Link:    "http://example.com",
+			},
+			want: true,
+		},
+		{
+			name: "Invalid - Only newlines in title",
+			post: Post{
+				Title: "\n\n\n",
+				Link:  "http://example.com",
+			},
+			want: false,
+		},
+		{
+			name: "Invalid - Only newlines in link",
+			post: Post{
+				Title: "Title",
+				Link:  "\n\n\n",
+			},
+			want: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -319,6 +380,62 @@ func TestPostSanitize(t *testing.T) {
 			wantTitle:   "Title",
 			wantContent: "Content",
 			wantLink:    "Link",
+		},
+		{
+			name: "Very long content trimmed correctly",
+			post: Post{
+				Title:   "  " + strings.Repeat("A", 10000) + "  ",
+				Content: "  " + strings.Repeat("Lorem ipsum", 1000) + "  ",
+				Link:    "  http://example.com  ",
+			},
+			wantTitle:   strings.Repeat("A", 10000),
+			wantContent: strings.Repeat("Lorem ipsum", 1000),
+			wantLink:    "http://example.com",
+		},
+		{
+			name: "Unicode preserved correctly",
+			post: Post{
+				Title:   "  日本語のタイトル 🚀  ",
+				Content: "  محتوى عربي  ",
+				Link:    "  http://example.com/日本語  ",
+			},
+			wantTitle:   "日本語のタイトル 🚀",
+			wantContent: "محتوى عربي",
+			wantLink:    "http://example.com/日本語",
+		},
+		{
+			name: "HTML content preserved",
+			post: Post{
+				Title:   "  HTML Post  ",
+				Content: "  <script>alert('xss')</script><p>Paragraph</p>  ",
+				Link:    "  http://example.com  ",
+			},
+			wantTitle:   "HTML Post",
+			wantContent: "<script>alert('xss')</script><p>Paragraph</p>",
+			wantLink:    "http://example.com",
+		},
+		{
+			name: "Newlines and tabs in content preserved (only outer whitespace trimmed)",
+			post: Post{
+				Title:   "  Multi-line Title\nLine 2  ",
+				Content: "  Line 1\nLine 2\tTabbed\rCarriage Return  ",
+				Link:    "  http://example.com  ",
+			},
+			wantTitle:   "Multi-line Title\nLine 2",
+			wantContent: "Line 1\nLine 2\tTabbed\rCarriage Return",
+			wantLink:    "http://example.com",
+		},
+		{
+			name: "Negative ID preserved",
+			post: Post{
+				ID:      -1,
+				Title:   "  Negative  ",
+				Content: "  Content  ",
+				Link:    "  http://example.com  ",
+			},
+			wantTitle:   "Negative",
+			wantContent: "Content",
+			wantLink:    "http://example.com",
 		},
 	}
 
@@ -479,97 +596,6 @@ func TestFeedStructFields(t *testing.T) {
 			if len(tt.feed.Posts) != tt.wantPosts {
 				t.Errorf("Posts count = %d, want %d", len(tt.feed.Posts), tt.wantPosts)
 			}
-		})
-	}
-}
-
-// TestPostEdgeCases tests Post with edge case values
-func TestPostEdgeCases(t *testing.T) {
-	tests := []struct {
-		name        string
-		post        Post
-		description string
-	}{
-		{
-			name: "Very long title",
-			post: Post{
-				Title:   strings.Repeat("A", 10000),
-				Content: "Content",
-				Link:    "http://example.com",
-			},
-			description: "Post should handle very long titles",
-		},
-		{
-			name: "Very long content",
-			post: Post{
-				Title:   "Title",
-				Content: strings.Repeat("Lorem ipsum ", 10000),
-				Link:    "http://example.com",
-			},
-			description: "Post should handle very long content",
-		},
-		{
-			name: "Unicode in all fields",
-			post: Post{
-				Title:   "日本語のタイトル 🚀",
-				Content: "محتوى عربي",
-				Link:    "http://example.com/日本語",
-			},
-			description: "Post should handle unicode characters",
-		},
-		{
-			name: "HTML in content",
-			post: Post{
-				Title:   "HTML Post",
-				Content: "<script>alert('xss')</script><p>Paragraph</p>",
-				Link:    "http://example.com",
-			},
-			description: "Post should store HTML without modification",
-		},
-		{
-			name: "Special characters in link",
-			post: Post{
-				Title:   "Query Params",
-				Content: "Content",
-				Link:    "http://example.com/path?param=value&other=test#anchor",
-			},
-			description: "Post should handle complex URLs",
-		},
-		{
-			name: "Negative ID",
-			post: Post{
-				ID:      -1,
-				Title:   "Negative",
-				Content: "Content",
-				Link:    "http://example.com",
-			},
-			description: "Post can have negative ID (validation elsewhere)",
-		},
-		{
-			name: "Newlines and tabs in content",
-			post: Post{
-				Title:   "Multi-line Title\nLine 2",
-				Content: "Line 1\nLine 2\tTabbed\rCarriage Return",
-				Link:    "http://example.com",
-			},
-			description: "Post should preserve whitespace characters",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// Just verify the struct can be created and fields are accessible
-			if tt.post.Title == "" && tt.name != "Very long title" {
-				// Most tests should have non-empty titles
-				t.Logf("Test case: %s", tt.description)
-			}
-			
-			// Verify field accessibility
-			_ = tt.post.ID
-			_ = tt.post.Title
-			_ = tt.post.Content
-			_ = tt.post.Link
-			_ = tt.post.Read
 		})
 	}
 }
