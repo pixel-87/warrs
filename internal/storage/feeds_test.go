@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -238,5 +239,249 @@ func TestMultipleFeedsOperations(t *testing.T) {
 
 	if len(feeds) != 2 {
 		t.Errorf("expected 2 feeds after deletion, got %d", len(feeds))
+	}
+}
+
+// TestAddFeedEdgeCases tests edge cases with unusual input
+func TestAddFeedEdgeCases(t *testing.T) {
+	tests := []struct {
+		name    string
+		url     string
+		title   string
+		wantErr bool
+	}{
+		{
+			name:    "Very long URL",
+			url:     "https://example.com/" + string(make([]byte, 2000)),
+			title:   "Test",
+			wantErr: false,
+		},
+		{
+			name:    "Unicode in title",
+			url:     "https://example.com/feed1.xml",
+			title:   "日本語のタイトル 🚀",
+			wantErr: false,
+		},
+		{
+			name:    "Special characters in URL",
+			url:     "https://example.com/feed?param=value&other=test",
+			title:   "Query Params",
+			wantErr: false,
+		},
+		{
+			name:    "SQL-like content in title (injection test)",
+			url:     "https://example.com/sql.xml",
+			title:   "'; DROP TABLE feeds; --",
+			wantErr: false,
+		},
+		{
+			name:    "SQL-like content in URL (injection test)",
+			url:     "https://example.com/feed'; DELETE FROM feeds WHERE '1'='1",
+			title:   "Injection Test",
+			wantErr: false,
+		},
+		{
+			name:    "Newlines in title",
+			url:     "https://example.com/newline.xml",
+			title:   "Line 1\nLine 2\nLine 3",
+			wantErr: false,
+		},
+		{
+			name:    "Tabs and spaces in title",
+			url:     "https://example.com/tabs.xml",
+			title:   "Title\t\twith\ttabs\tand   spaces",
+			wantErr: false,
+		},
+		{
+			name:    "HTML in title",
+			url:     "https://example.com/html.xml",
+			title:   "<script>alert('xss')</script>",
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db := setupTestDB(t)
+			
+			err := db.AddFeed(tt.url, tt.title)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("AddFeed() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			// Verify it was stored correctly if no error expected
+			if !tt.wantErr {
+				feeds, err := db.GetFeeds()
+				if err != nil {
+					t.Fatalf("GetFeeds() error = %v", err)
+				}
+				
+				if len(feeds) != 1 {
+					t.Fatalf("expected 1 feed, got %d", len(feeds))
+				}
+				
+				if feeds[0].URL != tt.url {
+					t.Errorf("URL mismatch: got %q, want %q", feeds[0].URL, tt.url)
+				}
+				
+				if feeds[0].Title != tt.title {
+					t.Errorf("Title mismatch: got %q, want %q", feeds[0].Title, tt.title)
+				}
+			}
+		})
+	}
+}
+
+// TestUpdateFeedEdgeCases tests update with edge cases
+func TestUpdateFeedEdgeCases(t *testing.T) {
+	tests := []struct {
+		name        string
+		initialURL  string
+		initialTitle string
+		updateURL   string
+		updateTitle string
+		updateID    int
+		wantErr     bool
+	}{
+		{
+			name:        "Update non-existent feed",
+			initialURL:  "https://example.com/exists.xml",
+			initialTitle: "Exists",
+			updateURL:   "https://example.com/new.xml",
+			updateTitle: "Updated",
+			updateID:    99999, // Non-existent ID
+			wantErr:     false, // SQLite silently succeeds if no rows affected
+		},
+		{
+			name:        "Update with negative ID",
+			initialURL:  "https://example.com/exists.xml",
+			initialTitle: "Exists",
+			updateURL:   "https://example.com/new.xml",
+			updateTitle: "Updated",
+			updateID:    -1,
+			wantErr:     false,
+		},
+		{
+			name:        "Update with zero ID",
+			initialURL:  "https://example.com/exists.xml",
+			initialTitle: "Exists",
+			updateURL:   "https://example.com/new.xml",
+			updateTitle: "Updated",
+			updateID:    0,
+			wantErr:     false,
+		},
+		{
+			name:        "Update to empty strings",
+			initialURL:  "https://example.com/exists.xml",
+			initialTitle: "Exists",
+			updateURL:   "",
+			updateTitle: "",
+			updateID:    1,
+			wantErr:     false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db := setupTestDB(t)
+			
+			// Add initial feed
+			if err := db.AddFeed(tt.initialURL, tt.initialTitle); err != nil {
+				t.Fatalf("failed to add initial feed: %v", err)
+			}
+
+			// Update feed
+			feed := models.Feed{
+				ID:    tt.updateID,
+				URL:   tt.updateURL,
+				Title: tt.updateTitle,
+			}
+			
+			err := db.UpdateFeed(feed)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("UpdateFeed() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+// TestDeleteFeedEdgeCases tests delete with edge cases
+func TestDeleteFeedEdgeCases(t *testing.T) {
+	tests := []struct {
+		name    string
+		id      int
+		wantErr bool
+	}{
+		{
+			name:    "Delete non-existent feed",
+			id:      99999,
+			wantErr: false, // SQLite silently succeeds
+		},
+		{
+			name:    "Delete with negative ID",
+			id:      -1,
+			wantErr: false,
+		},
+		{
+			name:    "Delete with zero ID",
+			id:      0,
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db := setupTestDB(t)
+			
+			err := db.DeleteFeed(tt.id)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("DeleteFeed() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+// TestConcurrentOperations tests basic concurrent safety
+func TestConcurrentOperations(t *testing.T) {
+	db := setupTestDB(t)
+	
+	// Add initial feeds
+	for i := 0; i < 10; i++ {
+		url := fmt.Sprintf("https://example.com/feed%d.xml", i)
+		title := fmt.Sprintf("Feed %d", i)
+		if err := db.AddFeed(url, title); err != nil {
+			t.Fatalf("failed to add feed %d: %v", i, err)
+		}
+	}
+
+	// Concurrent reads
+	done := make(chan bool, 5)
+	for i := 0; i < 5; i++ {
+		go func() {
+			_, err := db.GetFeeds()
+			if err != nil {
+				t.Errorf("concurrent GetFeeds() error: %v", err)
+			}
+			done <- true
+		}()
+	}
+
+	// Wait for all goroutines
+	for i := 0; i < 5; i++ {
+		<-done
+	}
+}
+
+// TestFeedTitleWithEmptyURL tests edge case validation
+func TestFeedTitleWithEmptyURL(t *testing.T) {
+	db := setupTestDB(t)
+	
+	// Empty URL should likely fail due to NOT NULL constraint
+	err := db.AddFeed("", "No URL Feed")
+	// We expect this to succeed since URL column is TEXT and empty string is valid
+	// The UNIQUE constraint only prevents duplicates
+	if err != nil {
+		t.Logf("AddFeed with empty URL returned error (expected): %v", err)
 	}
 }

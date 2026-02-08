@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+    <channel>
+        <title>Large Feed</title>
+        <item>
+            <title>Post 1</title>
+            <link>http://example.com/1</link>
+            <description>Content 1</description>
+        </item>
+        <item>
+            <title>Post 2</title>
+            <link>http://example.com/2</link>
+            <description>Content 2</description>
+        </item>
+        <item>
+            <title>Post 3</title>
+            <link>http://example.com/3</link>
+            <description>Content 3</description>
+        </item>
+        <item>
+            <title>Post 4</title>
+            <link>http://example.com/4</link>
+            <description>Content 4</description>
+        </item>
+        <item>
+            <title>Post 5</title>
+            <link>http://example.com/5</link>
+            <description>Content 5</description>
+        </item>
+    </channel>
+</rss>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+    <channel>
+        <item>
+            <title>Post Without Feed Title</title>
+            <link>http://example.com/no-title</link>
+            <description>Testing missing feed title</description>
+        </item>
+    </channel>
+</rss>
