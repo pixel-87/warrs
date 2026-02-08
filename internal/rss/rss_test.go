@@ -221,7 +221,7 @@ func TestParseFeedContentPriority(t *testing.T) {
 	}{
 		{
 			name: "Content Takes Priority Over Description",
-			data: `<?xml version="1.0"?><rss version="2.0"><channel><title>Test</title><item><title>Post</title><link>http://example.com</link><content:encoded>Priority Content</content:encoded><description>Fallback Description</description></item></channel></rss>`,
+			data: `<?xml version="1.0"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Test</title><item><title>Post</title><link>http://example.com</link><content:encoded>Priority Content</content:encoded><description>Fallback Description</description></item></channel></rss>`,
 			wantContent: "Priority Content",
 		},
 		{
@@ -236,7 +236,7 @@ func TestParseFeedContentPriority(t *testing.T) {
 		},
 		{
 			name: "Empty Content Triggers Fallback to Description",
-			data: `<?xml version="1.0"?><rss version="2.0"><channel><title>Test</title><item><title>Post</title><link>http://example.com</link><content:encoded></content:encoded><description>Should Use This</description></item></channel></rss>`,
+			data: `<?xml version="1.0"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Test</title><item><title>Post</title><link>http://example.com</link><content:encoded></content:encoded><description>Should Use This</description></item></channel></rss>`,
 			wantContent: "Should Use This",
 		},
 	}
