@@ -12,7 +12,7 @@ import (
 func setupTestDB(t *testing.T) *DB {
 	tmpFile := "test_feeds.db"
 	// Clean up any previous test file
-	os.Remove(tmpFile)
+	_ = os.Remove(tmpFile)
 
 	db, err := NewDB(tmpFile)
 	if err != nil {
@@ -20,8 +20,8 @@ func setupTestDB(t *testing.T) *DB {
 	}
 
 	t.Cleanup(func() {
-		db.Close()
-		os.Remove(tmpFile)
+		_ = db.Close()
+		_ = os.Remove(tmpFile)
 	})
 
 	return db

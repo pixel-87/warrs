@@ -20,7 +20,11 @@ func (d *DB) GetFeeds() ([]models.Feed, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			fmt.Printf("error closing rows: %v\n", err)
+		}
+	}()
 
 	var feeds []models.Feed
 	for rows.Next() {
