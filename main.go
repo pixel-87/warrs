@@ -13,7 +13,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("database error: %v", err)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Printf("error closing database: %v", err)
+		}
+	}()
 
 	fetcher := rss.NewFetcher(db)
 
