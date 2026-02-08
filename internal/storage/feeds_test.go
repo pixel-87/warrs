@@ -402,10 +402,18 @@ func TestUpdateFeedEdgeCases(t *testing.T) {
 				if err != nil {
 					t.Fatalf("failed to get feeds: %v", err)
 				}
-				if len(feeds) == 0 {
-					t.Fatal("expected at least one feed after insertion")
+				// Find the feed we just inserted by matching URL and Title
+				found := false
+				for _, f := range feeds {
+					if f.URL == tt.initialURL && f.Title == tt.initialTitle {
+						updateID = f.ID
+						found = true
+						break
+					}
 				}
-				updateID = feeds[0].ID
+				if !found {
+					t.Fatalf("failed to find inserted feed with URL %q and Title %q", tt.initialURL, tt.initialTitle)
+				}
 			}
 
 			// Update feed
