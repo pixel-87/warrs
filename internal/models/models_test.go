@@ -574,59 +574,99 @@ func TestPostEdgeCases(t *testing.T) {
 	}
 }
 
-// TestFeedEdgeCases tests Feed with edge case values  
+// TestFeedEdgeCases tests Feed behavior with edge case values  
 func TestFeedEdgeCases(t *testing.T) {
 	tests := []struct {
-		name        string
-		feed        Feed
-		description string
+		name             string
+		feed             Feed
+		wantHasUnread    bool
+		wantUnreadCount  int
 	}{
 		{
-			name: "Feed with many posts",
+			name: "Feed with many unread posts",
 			feed: Feed{
 				Title: "Large Feed",
 				URL:   "http://example.com",
 				Posts: make([]Post, 1000),
 			},
-			description: "Feed should handle large number of posts",
+			wantHasUnread:   true,
+			wantUnreadCount: 1000,
 		},
 		{
-			name: "Feed with empty URL",
+			name: "Feed with many read posts",
+			feed: Feed{
+				Title: "Large Feed All Read",
+				URL:   "http://example.com",
+				Posts: func() []Post {
+					posts := make([]Post, 1000)
+					for i := range posts {
+						posts[i].Read = true
+					}
+					return posts
+				}(),
+			},
+			wantHasUnread:   false,
+			wantUnreadCount: 0,
+		},
+		{
+			name: "Feed with empty URL but has unread posts",
 			feed: Feed{
 				Title: "No URL",
 				URL:   "",
-				Posts: []Post{{Title: "Post"}},
+				Posts: []Post{{Title: "Post", Read: false}},
 			},
-			description: "Feed can have empty URL",
+			wantHasUnread:   true,
+			wantUnreadCount: 1,
 		},
 		{
-			name: "Feed with very long URL",
+			name: "Feed with very long URL and nil posts",
 			feed: Feed{
 				Title: "Long URL",
 				URL:   "http://example.com/" + strings.Repeat("path/", 500),
 				Posts: nil,
 			},
-			description: "Feed should handle very long URLs",
+			wantHasUnread:   false,
+			wantUnreadCount: 0,
 		},
 		{
-			name: "Feed with unicode in URL",
+			name: "Feed with unicode in URL and empty posts slice",
 			feed: Feed{
 				Title: "Unicode URL",
 				URL:   "http://example.com/日本語/feed.xml",
+				Posts: []Post{},
 			},
-			description: "Feed should handle unicode in URL",
+			wantHasUnread:   false,
+			wantUnreadCount: 0,
+		},
+		{
+			name: "Feed with mixed read/unread in large set",
+			feed: Feed{
+				Title: "Mixed Large Feed",
+				URL:   "http://example.com",
+				Posts: func() []Post {
+					posts := make([]Post, 1000)
+					for i := range posts {
+						posts[i].Read = (i % 2 == 0) // Every other post is read
+					}
+					return posts
+				}(),
+			},
+			wantHasUnread:   true,
+			wantUnreadCount: 500,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Verify struct can be created and fields accessible
-			_ = tt.feed.ID
-			_ = tt.feed.Title
-			_ = tt.feed.URL
-			_ = tt.feed.Posts
+			gotHasUnread := tt.feed.HasUnreadPosts()
+			if gotHasUnread != tt.wantHasUnread {
+				t.Errorf("HasUnreadPosts() = %v, want %v", gotHasUnread, tt.wantHasUnread)
+			}
 			
-			t.Logf("Test case: %s", tt.description)
+			gotUnreadCount := tt.feed.UnreadCount()
+			if gotUnreadCount != tt.wantUnreadCount {
+				t.Errorf("UnreadCount() = %d, want %d", gotUnreadCount, tt.wantUnreadCount)
+			}
 		})
 	}
 }
