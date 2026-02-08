@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+<channel>
+    <title>Unicode 测试 フィード 🎉</title>
+    <item>
+        <title>Emoji Post 🚀✨</title>
+        <link>http://example.com/emoji</link>
+        <description>Content with émojis and spëcial çharacters</description>
+    </item>
+    <item>
+        <title>日本語のタイトル</title>
+        <link>http://example.com/japanese</link>
+        <description>日本語の内容です</description>
+    </item>
+</channel>
+</rss>
