@@ -34,6 +34,18 @@ func NewDB(path string) (*DB, error) {
 		return nil, fmt.Errorf("error creating feed table: %w", err)
 	}
 
+	query = `
+	CREATE TABLE IF NOT EXISTS posts (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		feed_id INTEGER NOT NULL,
+		title TEXT NOT NULL,
+		link TEXT UNIQUE NOT NULL,
+		content TEXT,
+		published_at DATETIME,
+		read BOOLEAN DEFAULT 0,
+		FOREIGN KEY (feed_id) REFERENCES feeds(id) ON DELETE CASCADE
+	);`
+
 	return &DB{conn: db}, nil
 }
 

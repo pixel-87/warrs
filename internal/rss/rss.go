@@ -20,12 +20,13 @@ type Fetcher struct {
 	db     *storage.DB
 }
 
-func NewFetcher() *Fetcher {
+func NewFetcher(db *storage.DB) *Fetcher {
 	return &Fetcher{
 		parser: gofeed.NewParser(),
 		client: &http.Client{
 			Timeout: 10 * time.Second,
 		},
+		db: db,
 	}
 }
 
