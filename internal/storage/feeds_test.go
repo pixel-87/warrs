@@ -473,15 +473,31 @@ func TestConcurrentOperations(t *testing.T) {
 	}
 }
 
-// TestFeedTitleWithEmptyURL tests edge case validation
+// TestFeedTitleWithEmptyURL verifies behavior when adding a feed with an empty URL.
 func TestFeedTitleWithEmptyURL(t *testing.T) {
 	db := setupTestDB(t)
-	
-	// Empty URL should likely fail due to NOT NULL constraint
+
+	// We expect this to succeed since URL column is TEXT and empty string is valid.
+	// The UNIQUE constraint only prevents duplicates.
 	err := db.AddFeed("", "No URL Feed")
-	// We expect this to succeed since URL column is TEXT and empty string is valid
-	// The UNIQUE constraint only prevents duplicates
 	if err != nil {
-		t.Logf("AddFeed with empty URL returned error (expected): %v", err)
+		t.Fatalf("AddFeed with empty URL returned unexpected error: %v", err)
+	}
+
+	feeds, err := db.GetFeeds()
+	if err != nil {
+		t.Fatalf("GetFeeds after inserting empty URL feed returned error: %v", err)
+	}
+
+	found := false
+	for _, f := range feeds {
+		if f.URL == "" && f.Title == "No URL Feed" {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		t.Fatalf("expected to find feed with empty URL and title %q in database", "No URL Feed")
 	}
 }
