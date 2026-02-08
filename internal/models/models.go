@@ -15,5 +15,3 @@ type Feed struct {
 	Posts []Post
 	ID    int
 }
-
-

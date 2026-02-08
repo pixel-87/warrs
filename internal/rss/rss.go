@@ -20,13 +20,25 @@ type Fetcher struct {
 	db     *storage.DB
 }
 
-func NewFetcher(db *storage.DB) *Fetcher {
+// NewFetcherWithDB returns a Fetcher with an injected database.
+func NewFetcherWithDB(db *storage.DB) *Fetcher {
 	return &Fetcher{
 		parser: gofeed.NewParser(),
 		client: &http.Client{
 			Timeout: 10 * time.Second,
 		},
 		db: db,
+	}
+}
+
+// NewFetcher returns a Fetcher without a database (db may be nil).
+func NewFetcher() *Fetcher {
+	return &Fetcher{
+		parser: gofeed.NewParser(),
+		client: &http.Client{
+			Timeout: 10 * time.Second,
+		},
+		db: nil,
 	}
 }
 

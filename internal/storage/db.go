@@ -46,6 +46,10 @@ func NewDB(path string) (*DB, error) {
 		FOREIGN KEY (feed_id) REFERENCES feeds(id) ON DELETE CASCADE
 	);`
 
+	if _, err := db.Exec(query); err != nil {
+		return nil, fmt.Errorf("error creating posts table: %w", err)
+	}
+
 	return &DB{conn: db}, nil
 }
 

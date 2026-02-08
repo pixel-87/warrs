@@ -11,7 +11,9 @@ import (
 func setupTestDB(t *testing.T) *DB {
 	tmpFile := "test_feeds.db"
 	// Clean up any previous test file
-	os.Remove(tmpFile)
+	if err := os.Remove(tmpFile); err != nil && !os.IsNotExist(err) {
+		t.Fatalf("failed to remove previous test file: %v", err)
+	}
 
 	db, err := NewDB(tmpFile)
 	if err != nil {
@@ -19,8 +21,12 @@ func setupTestDB(t *testing.T) *DB {
 	}
 
 	t.Cleanup(func() {
-		db.Close()
-		os.Remove(tmpFile)
+		if err := db.Close(); err != nil {
+			t.Fatalf("failed to close test db: %v", err)
+		}
+		if err := os.Remove(tmpFile); err != nil && !os.IsNotExist(err) {
+			t.Fatalf("failed to remove test file: %v", err)
+		}
 	})
 
 	return db
