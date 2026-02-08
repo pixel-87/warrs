@@ -54,4 +54,3 @@ func (p *Post) Sanitize() Post {
 		Read:    p.Read,
 	}
 }
-

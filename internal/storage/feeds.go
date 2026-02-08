@@ -8,7 +8,7 @@ import (
 
 func (d *DB) AddFeed(url, title string) error {
 	query := `INSERT INTO feeds (url, title) VALUES (?, ?)`
-  _, err := d.conn.Exec(query, url, title)
+	_, err := d.conn.Exec(query, url, title)
 	if err != nil {
 		return fmt.Errorf("failed to add feed %q: %w", url, err)
 	}
