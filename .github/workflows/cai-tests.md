@@ -39,5 +39,5 @@ I want to increase test coverage using **Pure Functional Testing** principles.
 
 5. **Output:**
    - Create a Pull Request with the new tests.
-   - **Title the PR:** "[AI Test Gen] New pure logic tests"
+   - **Title the PR:** "[cai-tests] New pure logic tests"
    - Group multiple test files into a single PR if possible.
