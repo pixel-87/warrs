@@ -2,7 +2,7 @@
   mkShell,
   callPackage,
 
-  go,
+  go_1_26,
   gopls,
   gofumpt,
   goreleaser,
@@ -16,7 +16,7 @@ mkShell {
   inputsFrom = [ defaultPackage ];
 
   packages = [
-    go
+    go_1_26
     gopls
     gofumpt
     goreleaser

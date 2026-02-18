@@ -1,6 +1,6 @@
-{ lib, buildGoModule, version ? "unstable" }:
+{ lib, buildGo126Module, version ? "unstable" }:
 
-buildGoModule {
+buildGo126Module {
   pname = "warss";
   inherit version;
 
