@@ -85,14 +85,14 @@ func TestParseFeed(t *testing.T) {
 			}
 
 			res, err := f.parseFeed("http://test.com", content)
-			
+
 			if tt.wantErr {
 				if err == nil {
 					t.Errorf("parseFeed() expected error but got none")
 				}
 				return
 			}
-			
+
 			if err != nil {
 				t.Fatalf("parseFeed failed: %v", err)
 			}
@@ -143,25 +143,25 @@ func TestParseFeedEdgeCases(t *testing.T) {
 			wantErr:   true,
 		},
 		{
-			name: "Very Long Title",
-			data: `<?xml version="1.0"?><rss version="2.0"><channel><title>` + strings.Repeat("A", 1000) + `</title></channel></rss>`,
-			url:  "http://test.com",
+			name:      "Very Long Title",
+			data:      `<?xml version="1.0"?><rss version="2.0"><channel><title>` + strings.Repeat("A", 1000) + `</title></channel></rss>`,
+			url:       "http://test.com",
 			wantTitle: strings.Repeat("A", 1000),
 			wantCount: 0,
 			wantErr:   false,
 		},
 		{
-			name: "HTML Entities in Title",
-			data: `<?xml version="1.0"?><rss version="2.0"><channel><title>&lt;Test&gt; &amp; Blog</title></channel></rss>`,
-			url:  "http://test.com",
+			name:      "HTML Entities in Title",
+			data:      `<?xml version="1.0"?><rss version="2.0"><channel><title>&lt;Test&gt; &amp; Blog</title></channel></rss>`,
+			url:       "http://test.com",
 			wantTitle: "<Test> & Blog",
 			wantCount: 0,
 			wantErr:   false,
 		},
 		{
-			name: "Missing Both Content and Description",
-			data: `<?xml version="1.0"?><rss version="2.0"><channel><title>Test</title><item><title>Post</title><link>http://example.com</link></item></channel></rss>`,
-			url:  "http://test.com",
+			name:      "Missing Both Content and Description",
+			data:      `<?xml version="1.0"?><rss version="2.0"><channel><title>Test</title><item><title>Post</title><link>http://example.com</link></item></channel></rss>`,
+			url:       "http://test.com",
 			wantTitle: "Test",
 			wantCount: 1,
 			wantErr:   false,
@@ -175,9 +175,9 @@ func TestParseFeedEdgeCases(t *testing.T) {
 			wantErr:   true,
 		},
 		{
-			name: "CDATA Content",
-			data: `<?xml version="1.0"?><rss version="2.0"><channel><title>Test</title><item><title>Post</title><link>http://example.com</link><description><![CDATA[<p>HTML content</p>]]></description></item></channel></rss>`,
-			url:  "http://test.com",
+			name:      "CDATA Content",
+			data:      `<?xml version="1.0"?><rss version="2.0"><channel><title>Test</title><item><title>Post</title><link>http://example.com</link><description><![CDATA[<p>HTML content</p>]]></description></item></channel></rss>`,
+			url:       "http://test.com",
 			wantTitle: "Test",
 			wantCount: 1,
 			wantErr:   false,
@@ -189,14 +189,14 @@ func TestParseFeedEdgeCases(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			res, err := f.parseFeed(tt.url, []byte(tt.data))
-			
+
 			if tt.wantErr {
 				if err == nil {
 					t.Errorf("parseFeed() expected error but got none")
 				}
 				return
 			}
-			
+
 			if err != nil {
 				t.Fatalf("parseFeed() unexpected error: %v", err)
 			}
@@ -220,23 +220,23 @@ func TestParseFeedContentPriority(t *testing.T) {
 		wantContent string
 	}{
 		{
-			name: "Content Takes Priority Over Description",
-			data: `<?xml version="1.0"?><rss version="2.0"><channel><title>Test</title><item><title>Post</title><link>http://example.com</link><content:encoded>Priority Content</content:encoded><description>Fallback Description</description></item></channel></rss>`,
+			name:        "Content Takes Priority Over Description",
+			data:        `<?xml version="1.0"?><rss version="2.0"><channel><title>Test</title><item><title>Post</title><link>http://example.com</link><content:encoded>Priority Content</content:encoded><description>Fallback Description</description></item></channel></rss>`,
 			wantContent: "Priority Content",
 		},
 		{
-			name: "Description Used When No Content",
-			data: `<?xml version="1.0"?><rss version="2.0"><channel><title>Test</title><item><title>Post</title><link>http://example.com</link><description>Fallback Description</description></item></channel></rss>`,
+			name:        "Description Used When No Content",
+			data:        `<?xml version="1.0"?><rss version="2.0"><channel><title>Test</title><item><title>Post</title><link>http://example.com</link><description>Fallback Description</description></item></channel></rss>`,
 			wantContent: "Fallback Description",
 		},
 		{
-			name: "Empty String When Both Missing",
-			data: `<?xml version="1.0"?><rss version="2.0"><channel><title>Test</title><item><title>Post</title><link>http://example.com</link></item></channel></rss>`,
+			name:        "Empty String When Both Missing",
+			data:        `<?xml version="1.0"?><rss version="2.0"><channel><title>Test</title><item><title>Post</title><link>http://example.com</link></item></channel></rss>`,
 			wantContent: "",
 		},
 		{
-			name: "Empty Content Triggers Fallback to Description",
-			data: `<?xml version="1.0"?><rss version="2.0"><channel><title>Test</title><item><title>Post</title><link>http://example.com</link><content:encoded></content:encoded><description>Should Use This</description></item></channel></rss>`,
+			name:        "Empty Content Triggers Fallback to Description",
+			data:        `<?xml version="1.0"?><rss version="2.0"><channel><title>Test</title><item><title>Post</title><link>http://example.com</link><content:encoded></content:encoded><description>Should Use This</description></item></channel></rss>`,
 			wantContent: "Should Use This",
 		},
 	}

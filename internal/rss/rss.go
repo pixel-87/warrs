@@ -65,11 +65,11 @@ func (f *Fetcher) parseFeed(url string, data []byte) (models.Feed, error) {
 			content = item.Description
 		}
 		myFeed.Posts = append(myFeed.Posts, models.Post{
-			Title:   item.Title,
-			Link:    item.Link,
-			Content: content,
+			Title:       item.Title,
+			Link:        item.Link,
+			Content:     content,
 			PublishedAt: *item.PublishedParsed,
-			UpdatedAt: *item.UpdatedParsed,
+			UpdatedAt:   *item.UpdatedParsed,
 		})
 	}
 	return myFeed, nil

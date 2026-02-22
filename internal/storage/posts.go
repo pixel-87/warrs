@@ -7,7 +7,7 @@ import (
 	"github.com/pixel-87/warss/internal/models"
 )
 
-func (d *DB) AddPosts (feedID int, posts []models.Post) error {
+func (d *DB) AddPosts(feedID int, posts []models.Post) error {
 	query := `INSERT INTO posts (
 		feed_id,
 		title,
@@ -18,16 +18,16 @@ func (d *DB) AddPosts (feedID int, posts []models.Post) error {
 	)
 	VALUES (?, ?, ?, ?, ?, ?)
 	ON CONFLICT(link) DO NOTHING;`
-	
+
 	for i := range posts {
 		_, err := d.conn.Exec(
 			query,
 			feedID,
 			posts[i].Title,
 			posts[i].Link,
-			posts[i].Content
-			posts[i].PublishedAt
-			posts[i].UpdatedAt
+			posts[i].Content,
+			posts[i].PublishedAt,
+			posts[i].UpdatedAt,
 		)
 
 		if err != nil {

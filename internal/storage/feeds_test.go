@@ -303,7 +303,7 @@ func TestAddFeedEdgeCases(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			db := setupTestDB(t)
-			
+
 			err := db.AddFeed(tt.url, tt.title)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("AddFeed() error = %v, wantErr %v", err, tt.wantErr)
@@ -316,15 +316,15 @@ func TestAddFeedEdgeCases(t *testing.T) {
 				if err != nil {
 					t.Fatalf("GetFeeds() error = %v", err)
 				}
-				
+
 				if len(feeds) != 1 {
 					t.Fatalf("expected 1 feed, got %d", len(feeds))
 				}
-				
+
 				if feeds[0].URL != tt.url {
 					t.Errorf("URL mismatch: got %q, want %q", feeds[0].URL, tt.url)
 				}
-				
+
 				if feeds[0].Title != tt.title {
 					t.Errorf("Title mismatch: got %q, want %q", feeds[0].Title, tt.title)
 				}
@@ -336,56 +336,56 @@ func TestAddFeedEdgeCases(t *testing.T) {
 // TestUpdateFeedEdgeCases tests update with edge cases
 func TestUpdateFeedEdgeCases(t *testing.T) {
 	tests := []struct {
-		name        string
-		initialURL  string
+		name         string
+		initialURL   string
 		initialTitle string
-		updateURL   string
-		updateTitle string
-		updateID    int
-		wantErr     bool
+		updateURL    string
+		updateTitle  string
+		updateID     int
+		wantErr      bool
 	}{
 		{
-			name:        "Update non-existent feed",
-			initialURL:  "https://example.com/exists.xml",
+			name:         "Update non-existent feed",
+			initialURL:   "https://example.com/exists.xml",
 			initialTitle: "Exists",
-			updateURL:   "https://example.com/new.xml",
-			updateTitle: "Updated",
-			updateID:    99999, // Non-existent ID
-			wantErr:     false, // SQLite silently succeeds if no rows affected
+			updateURL:    "https://example.com/new.xml",
+			updateTitle:  "Updated",
+			updateID:     99999, // Non-existent ID
+			wantErr:      false, // SQLite silently succeeds if no rows affected
 		},
 		{
-			name:        "Update with negative ID",
-			initialURL:  "https://example.com/exists.xml",
+			name:         "Update with negative ID",
+			initialURL:   "https://example.com/exists.xml",
 			initialTitle: "Exists",
-			updateURL:   "https://example.com/new.xml",
-			updateTitle: "Updated",
-			updateID:    -1,
-			wantErr:     false,
+			updateURL:    "https://example.com/new.xml",
+			updateTitle:  "Updated",
+			updateID:     -1,
+			wantErr:      false,
 		},
 		{
-			name:        "Update with zero ID",
-			initialURL:  "https://example.com/exists.xml",
+			name:         "Update with zero ID",
+			initialURL:   "https://example.com/exists.xml",
 			initialTitle: "Exists",
-			updateURL:   "https://example.com/new.xml",
-			updateTitle: "Updated",
-			updateID:    0,
-			wantErr:     false,
+			updateURL:    "https://example.com/new.xml",
+			updateTitle:  "Updated",
+			updateID:     0,
+			wantErr:      false,
 		},
 		{
-			name:        "Update to empty strings",
-			initialURL:  "https://example.com/exists.xml",
+			name:         "Update to empty strings",
+			initialURL:   "https://example.com/exists.xml",
 			initialTitle: "Exists",
-			updateURL:   "",
-			updateTitle: "",
-			updateID:    1,
-			wantErr:     false,
+			updateURL:    "",
+			updateTitle:  "",
+			updateID:     1,
+			wantErr:      false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			db := setupTestDB(t)
-			
+
 			// Add initial feed
 			if err := db.AddFeed(tt.initialURL, tt.initialTitle); err != nil {
 				t.Fatalf("failed to add initial feed: %v", err)
@@ -397,7 +397,7 @@ func TestUpdateFeedEdgeCases(t *testing.T) {
 				URL:   tt.updateURL,
 				Title: tt.updateTitle,
 			}
-			
+
 			err := db.UpdateFeed(feed)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpdateFeed() error = %v, wantErr %v", err, tt.wantErr)
@@ -433,7 +433,7 @@ func TestDeleteFeedEdgeCases(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			db := setupTestDB(t)
-			
+
 			err := db.DeleteFeed(tt.id)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DeleteFeed() error = %v, wantErr %v", err, tt.wantErr)
@@ -445,7 +445,7 @@ func TestDeleteFeedEdgeCases(t *testing.T) {
 // TestConcurrentOperations tests basic concurrent safety
 func TestConcurrentOperations(t *testing.T) {
 	db := setupTestDB(t)
-	
+
 	// Add initial feeds
 	for i := 0; i < 10; i++ {
 		url := fmt.Sprintf("https://example.com/feed%d.xml", i)
