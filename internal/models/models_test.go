@@ -137,7 +137,7 @@ func TestFeedUnreadCount(t *testing.T) {
 			feed: Feed{
 				Posts: func() []Post {
 					posts := make([]Post, 100)
-					for i := 0; i < 100; i++ {
+					for i := range 100 {
 						posts[i] = Post{Read: i%2 == 0} // Half read, half unread
 					}
 					return posts
@@ -246,11 +246,11 @@ func TestPostIsValid(t *testing.T) {
 // TestPostSanitize tests the Sanitize method
 func TestPostSanitize(t *testing.T) {
 	tests := []struct {
-		name      string
-		post      Post
-		wantTitle string
+		name        string
+		post        Post
+		wantTitle   string
 		wantContent string
-		wantLink  string
+		wantLink    string
 	}{
 		{
 			name: "Trim whitespace from all fields",
@@ -325,7 +325,7 @@ func TestPostSanitize(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.post.Sanitize()
-			
+
 			if got.Title != tt.wantTitle {
 				t.Errorf("Sanitize().Title = %q, want %q", got.Title, tt.wantTitle)
 			}
@@ -335,7 +335,7 @@ func TestPostSanitize(t *testing.T) {
 			if got.Link != tt.wantLink {
 				t.Errorf("Sanitize().Link = %q, want %q", got.Link, tt.wantLink)
 			}
-			
+
 			// Verify ID and Read are preserved
 			if got.ID != tt.post.ID {
 				t.Errorf("Sanitize().ID = %d, want %d", got.ID, tt.post.ID)
@@ -354,9 +354,9 @@ func TestSanitizeDoesNotModifyOriginal(t *testing.T) {
 		Content: "  Content  ",
 		Link:    "  Link  ",
 	}
-	
+
 	sanitized := original.Sanitize()
-	
+
 	// Original should remain unchanged
 	if original.Title != "  Original  " {
 		t.Errorf("Sanitize modified original.Title")
@@ -367,7 +367,7 @@ func TestSanitizeDoesNotModifyOriginal(t *testing.T) {
 	if original.Link != "  Link  " {
 		t.Errorf("Sanitize modified original.Link")
 	}
-	
+
 	// Sanitized should be trimmed
 	if sanitized.Title != "Original" {
 		t.Errorf("Sanitized.Title = %q, want %q", sanitized.Title, "Original")
@@ -377,9 +377,9 @@ func TestSanitizeDoesNotModifyOriginal(t *testing.T) {
 // TestPostStructFields tests Post struct field values
 func TestPostStructFields(t *testing.T) {
 	tests := []struct {
-		name    string
-		post    Post
-		wantID  int
+		name     string
+		post     Post
+		wantID   int
 		wantRead bool
 	}{
 		{
@@ -563,7 +563,7 @@ func TestPostEdgeCases(t *testing.T) {
 				// Most tests should have non-empty titles
 				t.Logf("Test case: %s", tt.description)
 			}
-			
+
 			// Verify field accessibility
 			_ = tt.post.ID
 			_ = tt.post.Title
@@ -574,7 +574,7 @@ func TestPostEdgeCases(t *testing.T) {
 	}
 }
 
-// TestFeedEdgeCases tests Feed with edge case values  
+// TestFeedEdgeCases tests Feed with edge case values
 func TestFeedEdgeCases(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -625,7 +625,7 @@ func TestFeedEdgeCases(t *testing.T) {
 			_ = tt.feed.Title
 			_ = tt.feed.URL
 			_ = tt.feed.Posts
-			
+
 			t.Logf("Test case: %s", tt.description)
 		})
 	}
@@ -640,7 +640,7 @@ func TestPostComparison(t *testing.T) {
 		Link:    "http://example.com",
 		Read:    false,
 	}
-	
+
 	post2 := Post{
 		ID:      1,
 		Title:   "Same Title",
@@ -648,7 +648,7 @@ func TestPostComparison(t *testing.T) {
 		Link:    "http://example.com",
 		Read:    false,
 	}
-	
+
 	post3 := Post{
 		ID:      2,
 		Title:   "Different Title",
@@ -656,7 +656,7 @@ func TestPostComparison(t *testing.T) {
 		Link:    "http://example.com/different",
 		Read:    true,
 	}
-	
+
 	// Test field-by-field comparison
 	if post1.ID != post2.ID {
 		t.Errorf("post1.ID != post2.ID")
@@ -664,7 +664,7 @@ func TestPostComparison(t *testing.T) {
 	if post1.Title != post2.Title {
 		t.Errorf("post1.Title != post2.Title")
 	}
-	
+
 	if post1.ID == post3.ID {
 		t.Errorf("post1.ID should not equal post3.ID")
 	}
