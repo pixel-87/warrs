@@ -137,7 +137,7 @@ func TestFeedUnreadCount(t *testing.T) {
 			feed: Feed{
 				Posts: func() []Post {
 					posts := make([]Post, 100)
-					for i := range 100 {
+					for i := 0; i < 100; i++ {
 						posts[i] = Post{Read: i%2 == 0} // Half read, half unread
 					}
 					return posts
@@ -308,9 +308,9 @@ func TestPostSanitize(t *testing.T) {
 			wantLink:    "",
 		},
 		{
-			name: "Preserve ID and Read fields",
+			name: "Preserve FeedID and Read fields",
 			post: Post{
-				ID:      42,
+				FeedID:  42,
 				Title:   "  Title  ",
 				Content: "  Content  ",
 				Link:    "  Link  ",
@@ -336,9 +336,9 @@ func TestPostSanitize(t *testing.T) {
 				t.Errorf("Sanitize().Link = %q, want %q", got.Link, tt.wantLink)
 			}
 
-			// Verify ID and Read are preserved
-			if got.ID != tt.post.ID {
-				t.Errorf("Sanitize().ID = %d, want %d", got.ID, tt.post.ID)
+			// Verify FeedID and Read are preserved
+			if got.FeedID != tt.post.FeedID {
+				t.Errorf("Sanitize().FeedID = %d, want %d", got.FeedID, tt.post.FeedID)
 			}
 			if got.Read != tt.post.Read {
 				t.Errorf("Sanitize().Read = %v, want %v", got.Read, tt.post.Read)
@@ -377,10 +377,10 @@ func TestSanitizeDoesNotModifyOriginal(t *testing.T) {
 // TestPostStructFields tests Post struct field values
 func TestPostStructFields(t *testing.T) {
 	tests := []struct {
-		name     string
-		post     Post
-		wantID   int
-		wantRead bool
+		name       string
+		post       Post
+		wantFeedID int
+		wantRead   bool
 	}{
 		{
 			name: "Default Post values",
@@ -389,20 +389,20 @@ func TestPostStructFields(t *testing.T) {
 				Content: "Test Content",
 				Link:    "http://example.com",
 			},
-			wantID:   0,
-			wantRead: false,
+			wantFeedID: 0,
+			wantRead:   false,
 		},
 		{
 			name: "Post with all fields set",
 			post: Post{
-				ID:      42,
+				FeedID:  42,
 				Title:   "Full Post",
 				Content: "Full Content",
 				Link:    "http://example.com/full",
 				Read:    true,
 			},
-			wantID:   42,
-			wantRead: true,
+			wantFeedID: 42,
+			wantRead:   true,
 		},
 		{
 			name: "Post with empty strings",
@@ -411,15 +411,15 @@ func TestPostStructFields(t *testing.T) {
 				Content: "",
 				Link:    "",
 			},
-			wantID:   0,
-			wantRead: false,
+			wantFeedID: 0,
+			wantRead:   false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.post.ID != tt.wantID {
-				t.Errorf("ID = %d, want %d", tt.post.ID, tt.wantID)
+			if tt.post.FeedID != tt.wantFeedID {
+				t.Errorf("FeedID = %d, want %d", tt.post.FeedID, tt.wantFeedID)
 			}
 			if tt.post.Read != tt.wantRead {
 				t.Errorf("Read = %v, want %v", tt.post.Read, tt.wantRead)
@@ -536,14 +536,14 @@ func TestPostEdgeCases(t *testing.T) {
 			description: "Post should handle complex URLs",
 		},
 		{
-			name: "Negative ID",
+			name: "Negative FeedID",
 			post: Post{
-				ID:      -1,
+				FeedID:  -1,
 				Title:   "Negative",
 				Content: "Content",
 				Link:    "http://example.com",
 			},
-			description: "Post can have negative ID (validation elsewhere)",
+			description: "Post can have negative FeedID (validation elsewhere)",
 		},
 		{
 			name: "Newlines and tabs in content",
@@ -565,7 +565,7 @@ func TestPostEdgeCases(t *testing.T) {
 			}
 
 			// Verify field accessibility
-			_ = tt.post.ID
+			_ = tt.post.FeedID
 			_ = tt.post.Title
 			_ = tt.post.Content
 			_ = tt.post.Link
@@ -634,7 +634,7 @@ func TestFeedEdgeCases(t *testing.T) {
 // TestPostComparison tests comparing Post structs
 func TestPostComparison(t *testing.T) {
 	post1 := Post{
-		ID:      1,
+		FeedID:  1,
 		Title:   "Same Title",
 		Content: "Same Content",
 		Link:    "http://example.com",
@@ -642,7 +642,7 @@ func TestPostComparison(t *testing.T) {
 	}
 
 	post2 := Post{
-		ID:      1,
+		FeedID:  1,
 		Title:   "Same Title",
 		Content: "Same Content",
 		Link:    "http://example.com",
@@ -650,7 +650,7 @@ func TestPostComparison(t *testing.T) {
 	}
 
 	post3 := Post{
-		ID:      2,
+		FeedID:  2,
 		Title:   "Different Title",
 		Content: "Different Content",
 		Link:    "http://example.com/different",
@@ -658,15 +658,15 @@ func TestPostComparison(t *testing.T) {
 	}
 
 	// Test field-by-field comparison
-	if post1.ID != post2.ID {
-		t.Errorf("post1.ID != post2.ID")
+	if post1.FeedID != post2.FeedID {
+		t.Errorf("post1.FeedID != post2.FeedID")
 	}
 	if post1.Title != post2.Title {
 		t.Errorf("post1.Title != post2.Title")
 	}
 
-	if post1.ID == post3.ID {
-		t.Errorf("post1.ID should not equal post3.ID")
+	if post1.FeedID == post3.FeedID {
+		t.Errorf("post1.FeedID should not equal post3.FeedID")
 	}
 	if post1.Read == post3.Read {
 		t.Errorf("post1.Read should not equal post3.Read")

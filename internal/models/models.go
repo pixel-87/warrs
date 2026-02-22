@@ -53,9 +53,11 @@ func (p *Post) IsValid() bool {
 func (p *Post) Sanitize() Post {
 	return Post{
 		FeedID:      p.FeedID,
-		Title:   strings.TrimSpace(p.Title),
-		Content: strings.TrimSpace(p.Content),
-		Link:    strings.TrimSpace(p.Link),
-		Read:    p.Read,
+		Title:       strings.TrimSpace(p.Title),
+		Content:     strings.TrimSpace(p.Content),
+		Link:        strings.TrimSpace(p.Link),
+		PublishedAt: p.PublishedAt,
+		UpdatedAt:   p.UpdatedAt,
+		Read:        p.Read,
 	}
 }
