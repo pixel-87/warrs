@@ -42,6 +42,7 @@ func NewDB(path string) (*DB, error) {
 		link TEXT UNIQUE NOT NULL,
 		content TEXT,
 		published_at DATETIME,
+		updated_at DATETIME,
 		read BOOLEAN DEFAULT 0,
 		FOREIGN KEY (feed_id) REFERENCES feeds(id) ON DELETE CASCADE
 	);`

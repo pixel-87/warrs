@@ -68,6 +68,8 @@ func (f *Fetcher) parseFeed(url string, data []byte) (models.Feed, error) {
 			Title:   item.Title,
 			Link:    item.Link,
 			Content: content,
+			PublishedAt: *item.PublishedParsed,
+			UpdatedAt: *item.UpdatedParsed,
 		})
 	}
 	return myFeed, nil

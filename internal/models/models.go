@@ -1,12 +1,17 @@
 package models
 
-import "strings"
+import (
+	"strings"
+	"time"
+)
 
 type Post struct {
 	Title   string
 	Content string
 	Link    string
-	ID      int
+	FeedID      int // feed id 
+	PublishedAt time.Time
+	UpdatedAt time.Time
 	Read    bool
 }
 
@@ -47,7 +52,7 @@ func (p *Post) IsValid() bool {
 // Sanitize returns a copy of the Post with trimmed whitespace
 func (p *Post) Sanitize() Post {
 	return Post{
-		ID:      p.ID,
+		FeedID:      p.FeedID,
 		Title:   strings.TrimSpace(p.Title),
 		Content: strings.TrimSpace(p.Content),
 		Link:    strings.TrimSpace(p.Link),
