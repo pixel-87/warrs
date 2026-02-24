@@ -23,6 +23,10 @@ func NewDB(path string) (*DB, error) {
 		return nil, fmt.Errorf("error pinging database: %w", err)
 	}
 
+	if _, err := db.Exec(`PRAGMA foreign_keys = ON;`); err != nil {
+		return nil, fmt.Errorf("Error enabling foreign keys %w", err)
+	}
+
 	query := `
 	CREATE TABLE IF NOT EXISTS feeds (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,7 +49,10 @@ func NewDB(path string) (*DB, error) {
 		updated_at DATETIME,
 		read BOOLEAN DEFAULT 0,
 		FOREIGN KEY (feed_id) REFERENCES feeds(id) ON DELETE CASCADE
-	);`
+	);
+	CREATE INDEX IF NOT EXISTS idx_post_feed_id ON posts(feed_id);
+	CREATE INDEX IF NOT EXISTS idx_post_feed_published ON posts(feed_id, published_at DESC);
+	`
 
 	if _, err := db.Exec(postQuery); err != nil {
 		return nil, fmt.Errorf("error creating posts table: %w", err)
