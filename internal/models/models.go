@@ -53,10 +53,13 @@ func (p *Post) IsValid() bool {
 // Sanitize returns a copy of the Post with trimmed whitespace
 func (p *Post) Sanitize() Post {
 	return Post{
-		FeedID:  p.FeedID,
-		Title:   strings.TrimSpace(p.Title),
-		Content: strings.TrimSpace(p.Content),
-		Link:    strings.TrimSpace(p.Link),
-		Read:    p.Read,
+		ID:          p.ID,
+		FeedID:      p.FeedID,
+		Title:       strings.TrimSpace(p.Title),
+		Content:     strings.TrimSpace(p.Content),
+		Link:        strings.TrimSpace(p.Link),
+		PublishedAt: p.PublishedAt,
+		UpdatedAt:   p.UpdatedAt,
+		Read:        p.Read,
 	}
 }
