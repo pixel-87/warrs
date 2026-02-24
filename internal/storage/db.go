@@ -24,7 +24,7 @@ func NewDB(path string) (*DB, error) {
 	}
 
 	if _, err := db.Exec(`PRAGMA foreign_keys = ON;`); err != nil {
-		return nil, fmt.Errorf("Error enabling foreign keys %w", err)
+		return nil, fmt.Errorf("error enabling foreign keys %w", err)
 	}
 
 	query := `
