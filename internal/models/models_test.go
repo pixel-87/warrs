@@ -3,6 +3,7 @@ package models
 import (
 	"strings"
 	"testing"
+	"time"
 )
 
 // TestFeedHasUnreadPosts tests the HasUnreadPosts method
@@ -308,13 +309,16 @@ func TestPostSanitize(t *testing.T) {
 			wantLink:    "",
 		},
 		{
-			name: "Preserve ID and Read fields",
+			name: "Preserve all non-string fields",
 			post: Post{
-				ID:      42,
-				Title:   "  Title  ",
-				Content: "  Content  ",
-				Link:    "  Link  ",
-				Read:    true,
+				ID:          42,
+				FeedID:      7,
+				Title:       "  Title  ",
+				Content:     "  Content  ",
+				Link:        "  Link  ",
+				PublishedAt: time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC),
+				UpdatedAt:   time.Date(2024, 1, 2, 12, 0, 0, 0, time.UTC),
+				Read:        true,
 			},
 			wantTitle:   "Title",
 			wantContent: "Content",
@@ -336,12 +340,21 @@ func TestPostSanitize(t *testing.T) {
 				t.Errorf("Sanitize().Link = %q, want %q", got.Link, tt.wantLink)
 			}
 
-			// Verify ID and Read are preserved
+			// Verify all fields are preserved
 			if got.ID != tt.post.ID {
 				t.Errorf("Sanitize().ID = %d, want %d", got.ID, tt.post.ID)
 			}
+			if got.FeedID != tt.post.FeedID {
+				t.Errorf("Sanitize().FeedID = %d, want %d", got.FeedID, tt.post.FeedID)
+			}
 			if got.Read != tt.post.Read {
 				t.Errorf("Sanitize().Read = %v, want %v", got.Read, tt.post.Read)
+			}
+			if !got.PublishedAt.Equal(tt.post.PublishedAt) {
+				t.Errorf("Sanitize().PublishedAt = %v, want %v", got.PublishedAt, tt.post.PublishedAt)
+			}
+			if !got.UpdatedAt.Equal(tt.post.UpdatedAt) {
+				t.Errorf("Sanitize().UpdatedAt = %v, want %v", got.UpdatedAt, tt.post.UpdatedAt)
 			}
 		})
 	}
